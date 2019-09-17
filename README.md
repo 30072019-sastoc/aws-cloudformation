@@ -24,7 +24,12 @@ Outputs:
        Syntax: !Join [*delimiter*,[*string1*,*string2*,*string3*,*...*]]	
 ### 3. Multiple Resources
 	   For Example, During EC2 Launch Instance, there are 2 main aws resources need to be created. However, without these 2 main resources EC2 instance creation will not be successful or you cannot proceed further for EC2 instance creation. The 2 main resources are VPC and Security Groups.
-	   Lets see how we can use Cloud Formation Template to demonstrate this usage. 
+	   a. Using !Ref Function, Lets see how we can use Cloud Formation Template to demonstrate this usage. 
+	   b. Pseudo Parameters, Predefined Parameters available for Cloud Formation Template. Similar to Environmental Variables - You can find this demonstration in the location  templates/pseudo-multi.yaml
+	   c. Mappings, - templates/mappings.yaml
+	   d. Input Parameters,  templates/inputparameters.yaml
+       e. Outputs, Provides access to information about resources within a stack - For example - Instance IP Address, DNS Name etc. 
+            templates/outputs.yaml	   
 	   
 	   
 	   

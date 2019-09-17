@@ -1,0 +1,61 @@
+Parameters:
+  TagNameDept:
+    Description: This is Input Parameter Demo. Department
+    Type: String
+  MyInstanceParamDetails:
+    Type: String
+    Default: t3.micro
+    AllowedValues: 
+      - t3.micro
+      - t3.medium
+      - t3.large
+    Description: Ec2 Instance Input Parameters
+  KeyPairParam:
+    Description: Enabling KeyPair for SSH Access
+    Type: AWS::EC2::KeyPair::KeyName    
+Mappings:
+  MyRegionMap:
+    ap-south-1:
+      AMI: ami-02913db388613c3e1
+    ap-southeast-1:
+      AMI: ami-048a01c78f7bae4aa
+    ap-southeast-2:
+      AMI: ami-03ed5bd63ba378bd8
+    ap-northeast-1:
+      AMI: ami-0ab3e16f9c414dee7
+    ap-east-1:
+      AMI: ami-d3e992a2
+Resources:
+  Ec2Instance: # Logical Id 
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: MyInstanceParamDetails
+      ImageId:  # Demo of Mappings
+        Fn::FindInMap:
+        - MyRegionMap
+        - !Ref AWS::Region
+        - AMI
+      Tags: # PseudoParameters - !Ref AWS::Region / !Ref AWS::StackName
+        - 
+          Key: Name
+          Value: !Join 
+            - " "
+            - - Ec2 Instance is created in 
+              - !Ref AWS::Region
+        - 
+          Key: Department
+          Value: !Ref TagNameDept
+      KeyName: !Ref KeyPairParam
+      SecurityGroups: 
+        - !Ref MyInstanceSG # Reference to Security Group. CF Template recognises this reference and invokes Line 13 for Security Group Creation first, followed by EC2 Instance Creation 
+  MyInstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SSH Access via port 22
+      SecurityGroupIngress: 
+        -
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0

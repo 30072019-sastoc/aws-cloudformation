@@ -1,0 +1,10 @@
+Resources:
+ IntrinsicFnEC2Instance: # Logical Id 
+   Type: AWS::EC2::Instance
+   Properties:
+     InstanceType: t3.micro
+     ImageId: ami-f8ee9589
+     Tags: 
+       - 
+         Key: Name
+         Value: !Join [" ",[Demonstration,of,intrinsic,functions,join]] # Demonstrating Instrinsic Functions

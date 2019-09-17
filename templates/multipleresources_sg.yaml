@@ -1,0 +1,23 @@
+Resources:
+  Ec2Instance: # Logical Id 
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: ami-f8ee9589
+      Tags: 
+        - 
+          Key: Name
+          Value: !Join [" ",[Demonstration,of,security,group,and,ec2instance,=>,Multiple,Resources,lab]] 
+      SecurityGroups: 
+        - !Ref MyInstanceSG # Reference to Security Group. CF Template recognises this reference and invokes Line 13 for Security Group Creation first, followed by EC2 Instance Creation 
+  MyInstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SSH Access via port 22
+      SecurityGroupIngress: 
+        -
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  

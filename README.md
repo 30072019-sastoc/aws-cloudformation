@@ -22,3 +22,9 @@ Outputs:
 		b. Updating existing stack using CF Template
 ### 2. Intrinsic Funtions
        Syntax: !Join [*delimiter*,[*string1*,*string2*,*string3*,*...*]]	
+### 3. Multiple Resources
+	   For Example, During EC2 Launch Instance, there are 2 main aws resources need to be created. However, without these 2 main resources EC2 instance creation will not be successful or you cannot proceed further for EC2 instance creation. The 2 main resources are VPC and Security Groups.
+	   Lets see how we can use Cloud Formation Template to demonstrate this usage. 
+	   
+	   
+	   

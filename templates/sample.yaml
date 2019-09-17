@@ -1,5 +1,5 @@
 Resources:
-    EC2Instance:
+    EC2Instance:# Logical Id 
         Type: AWS::EC2::Instance
         Properties:
             InstanceType: t3.micro

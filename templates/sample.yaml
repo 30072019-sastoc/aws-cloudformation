@@ -1,0 +1,9 @@
+Resources:
+    EC2Instance:
+        Type: AWS::EC2::Instance
+        Properties:
+            InstanceType: t3.micro
+            ImageId: ami-d3e992a2
+            Tags: # Adding with Tag Fields  to demonstrate update stack of Cloud Formation
+               - Key: Name
+                 Value: Sample Application Cloud Formation

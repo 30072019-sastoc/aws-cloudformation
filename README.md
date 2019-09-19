@@ -87,11 +87,11 @@ Outputs:
 		  
 	   From Public DNS, You can see Word Press Initial Website where you need to enter WordPress Title, initial credentials and email. Later this page is redirected to Login Page to enter the credentials. After successful login, click on title where you see landing page of Word Press.
 ### 8. Installing and Configuring -  Web Server, PHP, WordPress using Using cfn-init and cfn-hup  
-	   This is an effective and platform independent approach i.e., usually for Linux Platform, UserData Section consists of shell scripts whereas for Windows platform, UserData section use to be batch / powershell script. Therefore, for any Platform their is necessity of creating script supported by new platforms which makes process ineffective. Hence, resulting in many scripts which will difficult to manage.
+	   <p align=”justify”>This is an effective and platform independent approach i.e., usually for Linux Platform, UserData Section consists of shell scripts whereas for Windows platform, UserData section use to be batch / powershell script. Therefore, for any Platform their is necessity of creating script supported by new platforms which makes process ineffective. Hence, resulting in many scripts which will difficult to manage.
 	   
 	   cfn-init and cfn-hup provides a effective way of implementing generic script supported by most of the platforms.
 
-	   SSH to EC2 Instance to verify the logs.
+	   SSH to EC2 Instance to verify the logs.</p>
 	   
 	   $ cd /var/log/
 	   

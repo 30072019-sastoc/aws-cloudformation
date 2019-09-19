@@ -65,28 +65,56 @@ Outputs:
        Dynamically create EC2 Instance and DB Instance based on the region selected i.e., there is a usage Mapping Section in the template in which regions (only Asian region are configured for this template), ami's and instance types are defined.
 	   This will demonstrate the usage of template portability and reusability. 
 	   Template location - advance-templates/wp-infrastructure.yaml
-### 7. Installing and Configuring -  Web Server, PHP, WordPress using UserData Section [However, you may review User Data section to customize the steps or to correctly point out the php / webserver versions].
+### 7. Installing and Configuring -  Web Server, PHP, WordPress using UserData Section 
+       You may review User Data section to customize the steps or to correctly point out the php / webserver versions].
 	   Verifying installations, once Cloud Formation Stack is created. [Make sure SSH port 22 and http 80 is opened in security group once EC2 is provisioned]
 	   SSH to EC2 Instance, Follow below steps -
-	      ```
-		  $ cd /var/www/html
-		  //Check WordPress Installation files
-		  $ ls
-          // Verify DB Connection Details by opening the file wp-config.php. These DB connection details was defined in User Data section.
-          $ vi wp-config.php 		  
-		  // Verify Httpd Service is running
-		  $ ps -aux | grep httpd
-		  $ cd /var/log/
-		  $ ls
-		  // Go to End of the file. Verify Last Line which has updated date and time of the installation.
-		  $ vi cloud-init-output.log 
-	      ```
+	  $ cd /var/www/html
+	  
+	  //Check WordPress Installation files
+	  $ ls
+	  
+	  // Verify DB Connection Details by opening the file wp-config.php. These DB connection details was defined in User Data section.
+	  $ vi wp-config.php 		  
+	  
+	  // Verify Httpd Service is running
+	  $ ps -aux | grep httpd
+	  $ cd /var/log/
+	  $ ls
+	  
+	  // Go to End of the file. Verify Last Line which has updated date and time of the installation.
+	  $ vi cloud-init-output.log 
 		  
-		  From Public DNS, You can see Word Press Initial Website where you need to enter WordPress Title, initial credentials and email. Later this page is redirected to Login Page to enter the credentials. After successful login, click on title where you see landing page of Word Press.
-		  
-		  
+	   From Public DNS, You can see Word Press Initial Website where you need to enter WordPress Title, initial credentials and email. Later this page is redirected to Login Page to enter the credentials. After successful login, click on title where you see landing page of Word Press.
+### 8. Using cfn-init and cfn-hup to install and configure Web Server, PHP, WordPress	  
+	   This is an effective and platform independent approach i.e., usually for Linux Platform, UserData Section consists of shell scripts whereas for Windows platform, UserData section use to be batch / powershell script. Therefore, for any Platform their is necessity of creating script supported by new platforms which makes process ineffective. Hence, resulting in many scripts which will difficult to manage.
+	   
+	   cfn-init and cfn-hup provides a effective way of implementing generic script supported by most of the platforms.
 
-			
+	   SSH to EC2 Instance to verify the logs.
+	   
+	   $ cd /var/log/
+	   
+	   $ ls
+	   
+       cloud-init.log and cloud-init-output.log are generated when UserData Section is used
+       cloud-init-output.log - output data of script executed from commands defined in UserData Section 	   
+	   cfn-init.log and cfn-init-cmd.log are the files generated from cfn-init process
+	   cfn-init.log - will provide command output of cfn-init process which is executed from metadata section
+	   cfn-hup.log - generated from cfn-hup process when it is configured and started
+	   
+	   If we poll the logs from cfn-hup.log, 
+	   
+	   $ cat cfn-hup.log
+	   
+	   From the template, as it is polled every 5 minutes.
+	   
+	   Browse, Public IP Address - http://<publicip>/index2.html -> You can see string on the browser which is defined in Parameter Section of the template - "HelloWorld"
+	   
+	   Whenever this sample string is changed, cfn-hup detect the changes in the file index2.html. cfn-hup polls the changes. 
+	   
+	   $ tail -f cfn-hup.log
+	   
 	   
 	   
 	   

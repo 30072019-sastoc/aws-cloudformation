@@ -16,7 +16,8 @@ Transform:
 Resources:
 Outputs:
 ```
-## Exercise Section 
+## Beginners [1-5]
+## I. Exercise Section 
 ### 1. Demonstrate sample Cloud Formation Template
 		a. Creating EC2 Instance using CF Template
 		b. Updating existing stack using CF Template
@@ -58,9 +59,33 @@ Outputs:
 	   2. Updating SG Group Description, which will lead to creation of new SG and deleting old SG. This behavior is because we haven't defined any VPC/Subnet. 
 	   3. However, in step. 2, after defining vpc/subnet will also lead to creation of new SG and deleting old SG. This is expected. Once VPC / Subnet is defined, subsequent changes will not cause the creation of new SG and deleting old SG (Replacement).
 	   4. Updating SG Description, which will update existing SG descriptions. As we have already defined VPC in step 3 which is expected behavior.
-			
-			
-			
+## Intermediate
+## II. Advance Exercise Section			
+### 6. Creating Multiple resources - EC2 Instance, RDS DB Instance(MySQL), and S3 Bucket
+       Dynamically create EC2 Instance and DB Instance based on the region selected i.e., there is a usage Mapping Section in the template in which regions (only Asian region are configured for this template), ami's and instance types are defined.
+	   This will demonstrate the usage of template portability and reusability. 
+	   Template location - advance-templates/wp-infrastructure.yaml
+### 7. Installing and Configuring -  Web Server, PHP, WordPress using UserData Section [However, you may review User Data section to customize the steps or to correctly point out the php / webserver versions].
+	   Verifying installations, once Cloud Formation Stack is created. [Make sure SSH port 22 and http 80 is opened in security group once EC2 is provisioned]
+	   SSH to EC2 Instance, Follow below steps -
+	      ```
+		  $ cd /var/www/html
+		  //Check WordPress Installation files
+		  $ ls
+          // Verify DB Connection Details by opening the file wp-config.php. These DB connection details was defined in User Data section.
+          $ vi wp-config.php 		  
+		  // Verify Httpd Service is running
+		  $ ps -aux | grep httpd
+		  $ cd /var/log/
+		  $ ls
+		  // Go to End of the file. Verify Last Line which has updated date and time of the installation.
+		  $ vi cloud-init-output.log 
+	      ```
+		  
+		  From Public DNS, You can see Word Press Initial Website where you need to enter WordPress Title, initial credentials and email. Later this page is redirected to Login Page to enter the credentials. After successful login, click on title where you see landing page of Word Press.
+		  
+		  
+
 			
 	   
 	   

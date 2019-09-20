@@ -65,6 +65,7 @@ Outputs:
        Dynamically create EC2 Instance and DB Instance based on the region selected i.e., there is a usage Mapping Section in the template in which regions (only Asian region are configured for this template), ami's and instance types are defined.
 	   This will demonstrate the usage of template portability and reusability. 
 	   Template location - advance-templates/wp-infrastructure.yaml
+	   
 ### 7. Installing and Configuring -  Web Server, PHP, WordPress using UserData Section 
        You may review User Data section to customize the steps or to correctly point out the php / webserver versions].
 	   Verifying installations, once Cloud Formation Stack is created. [Make sure SSH port 22 and http 80 is opened in security group once EC2 is provisioned]
@@ -86,6 +87,9 @@ Outputs:
 	  $ vi cloud-init-output.log 
 		  
 	   From Public DNS, You can see Word Press Initial Website where you need to enter WordPress Title, initial credentials and email. Later this page is redirected to Login Page to enter the credentials. After successful login, click on title where you see landing page of Word Press.
+	   
+	   Template location - advance-templates/wp-infrastructure-install.yaml
+	   
 ### 8. Installing and Configuring -  Web Server, PHP, WordPress using Using cfn-init and cfn-hup  
 	   <p align=”justify”>This is an effective and platform independent approach i.e., usually for Linux Platform, UserData Section consists of shell scripts whereas for Windows platform, UserData section use to be batch / powershell script. Therefore, for any Platform their is necessity of creating script supported by new platforms which makes process ineffective. Hence, resulting in many scripts which will difficult to manage.
 	   
@@ -113,8 +117,27 @@ Outputs:
 	   
 	   Whenever this sample string is changed, cfn-hup detect the changes in the file index2.html. cfn-hup polls the changes. 
 	   
-	   $ tail -f cfn-hup.log
+       $ tail -f cfn-hup.log
 	   
+	   Template location - advance-templates/wp-infrastructure-cfn-init.yaml       
 	   
+### 9. Creation Policy and cfn-signal
+       cfn-signal - will help to send signal to Creation Policy about resource creation completion signal to CreationPolicy.
 	   
+	   Template Location -
+	   a. with no cfn-signal defined - advance-templates/wp-infrastructure-creationpolicy-no-cfn-signal.yaml
+	   b. with cfn-signal defined - advance-templates/wp-infrastructure-creationpolicy-cfn-signal.yaml
+	   
+### 10. Deletion Policy
+       Supported types are Delete, Retain (Supported by few AWS Resource types) and Snapshot (Supported by few AWS Resource types).
+	   By Default, Its ***Delete*** Policy. 
+	   To define, explicity you implement as ***DeletionPolicy: Delete***
+	   
+	   a. Delete Behavior
+	   Template Location: advance-templates/wp-infrastructure-delete-policy-explicit.yaml
+	   b. Retain / Snapshot
+		Retain Operation - Will retain s3 Bucket and skips deleting even though the stack is deleted.
+		Snapshot - First creates snapshot of RDS DB Instance then initiates deleting process.
+	   Template Location: advance-templates/wp-infrastructure-db-snapshot_s3-retain-policy-explicit.yaml
+      	   
 	   

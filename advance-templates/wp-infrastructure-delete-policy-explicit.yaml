@@ -1,0 +1,158 @@
+Parameters:
+  DatabaseName:
+    Type: String
+    Default: wordpress
+  DatabaseUser:
+    Type: String
+    Default: wordpress
+  DatabasePassword:
+    Type: String
+    Default: w0rdpr355
+    NoEcho: true
+Mappings:
+  AWSRegions:
+    ap-south-1:
+      AMI: ami-02913db388613c3e1
+      Instance: t2.micro
+      DBInstance: db.t2.micro
+    ap-southeast-1:
+      AMI: ami-048a01c78f7bae4aa
+      Instance: t2.micro
+      DBInstance: db.t2.micro
+    ap-southeast-2:
+      AMI: ami-03ed5bd63ba378bd8
+      Instance: t2.micro
+      DBInstance: db.t2.micro
+    ap-northeast-1:
+      AMI: ami-0ab3e16f9c414dee7
+      Instance: t2.micro
+      DBInstance: db.t2.micro
+    ap-east-1:
+      AMI: ami-f8ee9589
+      Instance: t3.micro
+      DBInstance: db.t3.micro
+Resources:
+  DB:
+    Type: "AWS::RDS::DBInstance"
+    DeletionPolicy: Delete #Explicit Delete Definition, By Default it is Delete
+    Properties:
+      AllocatedStorage: 5
+      StorageType: gp2
+      DBInstanceClass: !FindInMap [AWSRegions, !Ref "AWS::Region", DBInstance] # Dynamic mapping + Pseudo Parameter
+      DBName: !Ref DatabaseName
+      Engine: MySQL
+      MasterUsername: !Ref DatabaseUser
+      MasterUserPassword: !Ref DatabasePassword
+  MyEC2:
+    Type: AWS::EC2::Instance
+    DeletionPolicy: Delete #Explicit Delete Definition, By Default it is Delete
+    Properties:
+      ImageId: 
+        Fn::FindInMap:
+         - AWSRegions
+         - !Ref AWS::Region
+         - AMI
+      InstanceType:  
+        Fn::FindInMap:
+         - AWSRegions
+         - !Ref AWS::Region
+         - Instance
+# DependsOn is defined when there is dependency with other AWS Resources and you want to pause EC2 creation process. As there are some DB properties to be populated in UserData script, once DB is available required properties will be available. This will explicitly make sure EC2 will not be provisioned unless DB is created successfully.
+#      DependsOn: DB
+# Comment End for DependsOn
+      UserData:
+        "Fn::Base64":
+          !Sub |
+            #!/bin/bash
+            yum update -y aws-cfn-bootstrap
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyEC2 --configsets wdpress --region ${AWS::Region}
+            yum update -y
+            # cfn-signal will notify the stack/creation policy section, once all the resources are complete
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource MyEC2 --region ${AWS::Region}            
+      KeyName: aws-adminuser
+      #Creation Policies are defined per resource
+    CreationPolicy: # As cfn-signal is not defined, It's keep waiting and timesout. Because its keep's waiting for cfn-signal to return and is not defined. Hence, Stack creation fails and roll back entire stack creation process. Though, all the resources are created  due to failure it will rollback 
+      ResourceSignal:
+        Count: 1 # Expecting one signal to receive
+        Timeout: PT15M
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          wdpress: 
+            - configure_cldformation
+            - install_wdpress
+            - config_wdpress
+        configure_cldformation: # This configuration set up is used to detect changes in the Stack. If there is any change in stack, then cfn-hub process started.
+          files: # Three files are created - cfn-auto-reloader.conf, cfn-hup.conf, index2.html with the configurations given in Content section. 
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.MyEC2.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyEC2 --configsets wdpress --region ${AWS::Region}
+              mode: 000400
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+                verbose=true
+                interval=5
+              mode: 000400
+              owner: root
+              group: root
+            /var/www/html/index2.html:
+              content: Hello How are you
+          services:
+            sysvinit:
+              cfn-hup: # cfn-hub process is enabled and ensured it is started. 
+                enabled: true
+                ensureRunning: true
+                files: # If there is any change in below files, then cfn-hup process is started and rerun cfn-init process. 
+                  - /etc/cfn/cfn-hup.conf
+                  - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+        install_wdpress:
+          packages:
+            yum:
+              httpd: []
+              php: []
+              mysql: []
+              php-mysql: []
+          sources:
+            /var/www/html: https://wordpress.org/latest.tar.gz
+          services:
+            sysvinit:
+              httpd:
+                enabled: true
+                ensureRunning: true
+        config_wdpress:
+          commands:
+            01_prepare_config:
+              cwd: /var/www/html/wordpress
+              test: test ! -e /var/www/html/wordpress/wp-config.php # Make sure file exists
+              command: cp wp-config-sample.php wp-config.php
+            02_copy_dbhost:
+              cwd: /var/www/html/wordpress
+              command: !Sub |
+                sed -i 's/database_name_here/${DatabaseName}/g' wp-config.php # Injecting ${DatabaseName} defined in Parameters section
+            03_copy_dbaddr:
+              cwd: /var/www/html/wordpress
+              command: !Sub |
+                sed -i 's/localhost/${DB.Endpoint.Address}/g' wp-config.php # Injecting ${DB.Endpoint.Address} from Database
+            04_copy_dbuser:
+              cwd: /var/www/html/wordpress
+              command: !Sub |
+                sed -i 's/username_here/${DatabaseUser}/g' wp-config.php # Injecting ${DatabaseUser} defined in Parameters section
+            05_copy_dbpassword:
+              cwd: /var/www/html/wordpress
+              command: !Sub |
+                sed -i 's/password_here/${DatabasePassword}/g' wp-config.php # Injecting ${DatabasePassword} defined in Parameters section
+  S3:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Delete #Explicit Delete Definition, By Default it is Delete
+# As bucket name is static and must be unique globally. To create S3 bucket with unique name we need to comment below code. Hence, S3 Bucket will be unique globally.
+#    Properties:
+#      BucketName: wp-s3bucket18092019
+# End

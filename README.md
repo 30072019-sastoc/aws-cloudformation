@@ -135,9 +135,27 @@ Outputs:
 	   
 	   a. Delete Behavior
 	   Template Location: advance-templates/wp-infrastructure-delete-policy-explicit.yaml
+
 	   b. Retain / Snapshot
 		Retain Operation - Will retain s3 Bucket and skips deleting even though the stack is deleted.
 		Snapshot - First creates snapshot of RDS DB Instance then initiates deleting process.
-	   Template Location: advance-templates/wp-infrastructure-db-snapshot_s3-retain-policy-explicit.yaml
-      	   
+		Template Location: advance-templates/wp-infrastructure-db-snapshot_s3-retain-policy-explicit.yaml
+
+### 11. Intrinsic Functions
+    ##### Conditonal Functions
+    Restoring the DB Snapshot by demonstrating the usage of !Not, !Equals, !If Conditional Functions and AWS::NoValue Function
+	
+	Template Location: advance-templates/wp-infrastructure-db-snapshot-environmentselection-conditionalparam.yaml
+	
+	This template will create AWS Resources such as RDS Instance, EC2 Instance and S3 Instance. Also, when you create a stack you can observe, there is new parameter added as Environment Selection which includes - Development, Testing, Pre-Production, and Production. Environment selection is just dummy selection and the logic is implemented inside the Conditional Section of the template.
+    
+    For the DB Snapshot restore, when trying to create a stack with DB snapshot (Note: - DB snapshots can be found in the DB instances under snapshot and for which we need to copy snapshot id of DB instance). When we continue creating a stack it will Rollback due to the error - "DBName must be null when Restoring for this Engine." Because while restoring the snapshot, there are DBName, DBUser, DBPassword variables are assigned in the template which is not required for the snapshot restore. Therefore, to address this issue we can use "AWS::NoValue" which help to omit variables during snapshot restore.
+	You can refer modified file in the below location.
+	
+	Template Location: advance-templates/wp-infrastructure-db-snapshot-environmentselection-conditionalparam-noval.yaml
+	
+	Other Conditional Intrinsic Functions - Fn::Select | !Select, Fn::GetAzs, Fn::GetAtt, !Join, Fn::And | !And, Fn::Or | !Or, !Not
+	
+	Parametric Constraints, Kindly check in Parameter section where limits of certain Parameters are defined, like MinLength, MaxLength, NoEcho, AllowedValues. If any of these parameter constraints are not met during Stack Creation, CloudFormation would throw Validation Error. Please refer comment - Parameter Constraints in the template file - 
+	advance-templates/wp-infrastructure-db-snapshot-environmentselection-conditionalparam-noval.yaml
 	   

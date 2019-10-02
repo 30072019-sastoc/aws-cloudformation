@@ -65,6 +65,8 @@ Resources:
             yum update -y aws-cfn-bootstrap
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyEC2 --configsets wdpress --region ${AWS::Region}
             yum update -y
+            # cfn-hup helper is a daemon that detects changes in resource metadata and runs user-specified actions when a change is detected
+            /opt/aws/bin/cfn-hup -v || error_exit "Failed to Start cfn-hup"
       KeyName: aws-adminuser
       #Creation Policies are defined per resource
     CreationPolicy: # As cfn-signal is not defined, It's keep waiting and timesout. Because its keep's waiting for cfn-signal to return and is not defined. Hence, Stack creation fails and roll back entire stack creation process. Though, all the resources are created  due to failure it will rollback 
@@ -112,10 +114,10 @@ Resources:
         install_wdpress:
           packages:
             yum:
-              httpd: []
-              php: []
-              mysql: []
-              php-mysql: []
+              httpd24: []
+              php70: []
+              mysql56-server: []
+              php70-mysqlnd: []
           sources:
             /var/www/html: https://wordpress.org/latest.tar.gz
           services:

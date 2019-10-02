@@ -1,0 +1,355 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Application Environment Setup
+Metadata:
+ # UI Display when running this template from the AWS Management Console:
+  AWS::CloudFormation::Interface: 
+    ParameterGroups:
+      - Label:
+          default: VPC Configuration Details
+        Parameters:
+          - vpcid
+          - publicroutetable
+          - aprivateroutetable
+          - bprivateroutetable
+          - cprivateroutetable
+      - Label:
+          default: Application Details
+        Parameters: 
+          - applicationversion
+          - applicationbucketurl
+          - environment
+      - Label:
+          default: Application Environment VPC Configuration Details
+        Parameters:
+          - applicationpubliccidra
+          - applicationpubliccidrb
+          - applicationpubliccidrc
+          - applicationprivatecidra
+          - applicationprivatecidrb
+          - applicationprivatecidrc
+    ParameterLabels:
+      vpcid:
+        default: VPC Id
+      publicroutetable:
+        default: Public Route Table
+      aprivateroutetable:
+        default: A - Private Route Table
+      bprivateroutetable:
+        default: B - Private Route Table
+      cprivateroutetable:
+        default: C - Private Route Table
+      applicationversion:
+        default: Application Version
+      applicationbucketurl:
+        default: Artefact S3 Bucket Url
+      environment:
+        default: Environment
+      applicationpubliccidra:
+        default: Public Subnet-A Cidr Address for Application
+      applicationpubliccidrb:
+        default: Public Subnet-B Cidr Address for Application
+      applicationpubliccidrc:
+        default: Public Subnet-C Cidr Address for Application
+      applicationprivatecidra:
+        default: Private Subnet-A Cidr Address for Application
+      applicationprivatecidrb:
+        default: Private Subnet-B Cidr Address for Application
+      applicationprivatecidrc:
+        default: Private Subnet-C Cidr Address for Application
+Parameters:
+  vpcid: 
+    Type: AWS::EC2::VPC::Id # Custom Parameter Types - This will populate existing VPC's availabe in the region. Rather than entering it manually which is error prone.
+#    Description: VPC
+  publicroutetable:
+    Type: String
+#    Description: Public Route Table
+  aprivateroutetable:
+    Type: String
+#    Description: Private Route Table - A
+  bprivateroutetable:
+    Type: String
+#    Description: Private Route Table - B
+  cprivateroutetable:
+    Type: String
+#    Description: Private Route Table - C
+  applicationversion:
+    Type: String
+#    Description: Application Version to Deploy
+  applicationbucketurl:
+    Type: String
+#    Description: Application Bucket Location
+  environment:
+    Type: String
+#    Description: Environment Type
+    Default: Development
+    AllowedValues:
+      - Development
+      - Testing
+      - Staging
+      - Production
+  applicationpubliccidra:
+    Type: String
+#    Description: Public subnet A Cidr Address for app environment.
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
+  applicationpubliccidrb:
+    Type: String
+#    Description: Public subnet B Cidr Address for app environment.
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
+  applicationpubliccidrc:
+    Type: String
+#    Description: Public subnet C Cidr Address for app environment.
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
+  applicationprivatecidra:
+    Type: String
+#    Description: Private subnet A Cidr Address for app environment.
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
+  applicationprivatecidrb:
+    Type: String
+#    Description: Private subnet B Cidr Address for app environment.
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
+  applicationprivatecidrc:
+    Type: String
+#    Description: Private subnet C Cidr Address for app environment.
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
+Mappings:
+  AWSRegions:
+    ap-south-1:
+      AMI: ami-02913db388613c3e1
+      Instance: t2.micro
+    ap-southeast-1:
+      AMI: ami-048a01c78f7bae4aa
+      Instance: t2.micro
+    ap-southeast-2:
+      AMI: ami-03ed5bd63ba378bd8
+      Instance: t2.micro
+    ap-northeast-1:
+      AMI: ami-0ab3e16f9c414dee7
+      Instance: t2.micro
+    ap-east-1:
+      AMI: ami-f8ee9589
+      Instance: t3.micro
+  InstanceEnvironment:
+    Development:
+      MyEc2: t2.micro
+    Testing:
+      MyEc2: t2.micro
+    Staging:
+      MyEc2: t2.micro
+    Production:
+      MyEc2: t3.micro
+Resources:
+  PublicSubnetA: # Public Subnet for App Env in AZ - A
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs ]
+      CidrBlock: !Ref applicationpubliccidra
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref vpcid
+  PrivateSubnetA: # Private Subnet for App Env in AZ - A
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs ]
+      CidrBlock: !Ref applicationprivatecidra
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref vpcid
+  PublicSubnetB: # Public Subnet for App Env in AZ - B  (not used yet)
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs ]
+      CidrBlock: !Ref applicationpubliccidrb
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref vpcid
+  PrivateSubnetB: # Private Subnet for App Env in AZ - B (not used yet)
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs ]
+      CidrBlock: !Ref applicationprivatecidrb
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref vpcid
+  PublicSubnetC: # Public Subnet for App Env in AZ -  C (not used yet)
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [2, !GetAZs ]
+      CidrBlock: !Ref applicationpubliccidrc
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref vpcid
+  PrivateSubnetC: # Private Subnet for App Env in AZ - C (not used yet)
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [2, !GetAZs ]
+      CidrBlock: !Ref applicationprivatecidrc
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref vpcid
+  RouteTableAssociatePublicSubnetA: # Associates the subnet with a route table - passed via parameter
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref publicroutetable
+      SubnetId: !Ref PublicSubnetA
+  RouteTableAssociatePublicSubnetB: # Associates the subnet with a route table - passed via parameter
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref publicroutetable
+      SubnetId: !Ref PublicSubnetB # Associates the subnet with a route table - passed via parameter
+  RouteTableAssociatePublicSubnetC: # Associates the subnet with a route table - passed via parameter
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref publicroutetable
+      SubnetId: !Ref PublicSubnetC # Associates the subnet with a route table - passed via parameter
+  RouteTableAssociatePrivateSubnetA: # Associates the subnet with a route table - passed via parameter
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref aprivateroutetable
+      SubnetId: !Ref PrivateSubnetA # Associates the subnet with a route table - passed via parameter
+  RouteTableAssociatePrivateSubnetB: # Associates the subnet with a route table - passed via parameter
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref bprivateroutetable
+      SubnetId: !Ref PrivateSubnetB # Associates the subnet with a route table - passed via parameter
+  RouteTableAssociatePrivateSubnetC: # Associates the subnet with a route table - passed via parameter
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref cprivateroutetable
+      SubnetId: !Ref PrivateSubnetC # Associates the subnet with a route table - passed via parameter
+  MyELB:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      CrossZone: true
+      Instances:
+        - !Ref MyEc2
+      Listeners:
+        -
+          InstancePort: 80
+          InstanceProtocol: HTTP
+          LoadBalancerPort: 80
+          Protocol: HTTP
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+        - !Ref PublicSubnetC
+      SecurityGroups:
+        - !Ref SecGroup
+  SecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Join ["", ["Stack ", !Ref "AWS::StackId", " Application V", !Ref applicationversion, " - ", !Ref environment]]
+      VpcId: !Ref vpcid
+      SecurityGroupIngress:
+        -
+          CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          ToPort: 80
+          FromPort: 80
+        -
+          CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          ToPort: 22
+          FromPort: 22
+      SecurityGroupEgress:
+        -
+          CidrIp: 0.0.0.0/0
+          ToPort: -1
+          IpProtocol: -1
+
+  MyEc2: # for now this is in a public subnet, needs to be changed.
+    Type: AWS::EC2::Instance
+    DeletionPolicy: Delete
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT5M
+    Properties:
+      ImageId: !FindInMap [AWSRegions, !Ref "AWS::Region", AMI] # Dynamic mapping + Pseudo Parameter
+      InstanceType: !FindInMap [InstanceEnvironment, !Ref environment, MyEc2]
+      KeyName: aws-adminuser
+      SecurityGroupIds:
+        - !Ref SecGroup
+      SubnetId: !Ref PublicSubnetA
+      UserData:
+        "Fn::Base64":
+          !Sub |
+            #!/bin/bash
+            yum update -y aws-cfn-bootstrap # good practice - always do this.
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyEc2 --configsets www --region ${AWS::Region}
+            yum -y update
+            curl 127.0.0.1/app.php | grep -f /var/www/html/test.pattern
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource MyEc2 --region ${AWS::Region}
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          www:
+            - configure_cfn
+            - install_www
+            - config_app
+        configure_cfn:
+          files:
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.MyEc2.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource MyEc2 --configsets www --region ${AWS::Region}
+              mode: 000400
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+                verbose=true
+                interval=5
+              mode: 000400
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: true
+                ensureRunning: true
+                files:
+                  - /etc/cfn/cfn-hup.conf
+                  - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+        install_www:
+          packages:
+            yum:
+              httpd24: []
+              php70: []
+          services:
+            sysvinit:
+              httpd:
+                enabled: true
+                ensureRunning: true
+        config_app:
+          sources:
+            /var/www/html: !Join ["",[!Ref applicationbucketurl, "/App", !Ref applicationversion, ".zip"]]
+          files:
+            /var/www/html/test.pattern.zip:
+              source: !Join ["",[!Ref applicationbucketurl, "/Test", !Ref applicationversion, ".zip"]]
+              mode: 000644
+              owner: root
+              group: root
+          commands:
+            unzippattern:
+              cwd: /var/www/html
+              command: unzip -o test.pattern.zip
+Outputs:
+  Endpoint:
+    Description: Application Endpoint
+    Value: !Join ["", ["http://", !GetAtt MyELB.DNSName, "/app.php"]]

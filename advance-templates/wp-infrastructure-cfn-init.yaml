@@ -110,10 +110,10 @@ Resources:
         install_wdpress:
           packages:
             yum:
-              httpd: []
-              php: []
-              mysql: []
-              php-mysql: []
+              httpd24: []
+              php70: []
+              mysql56-server: []
+              php70-mysqlnd: []
           sources:
             /var/www/html: https://wordpress.org/latest.tar.gz
           services:

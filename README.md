@@ -59,7 +59,7 @@ Outputs:
 	   2. Updating SG Group Description, which will lead to creation of new SG and deleting old SG. This behavior is because we haven't defined any VPC/Subnet. 
 	   3. However, in step. 2, after defining vpc/subnet will also lead to creation of new SG and deleting old SG. This is expected. Once VPC / Subnet is defined, subsequent changes will not cause the creation of new SG and deleting old SG (Replacement).
 	   4. Updating SG Description, which will update existing SG descriptions. As we have already defined VPC in step 3 which is expected behavior.
-## Intermediate
+## Proficient
 ## II. Advance Exercise Section			
 ### 6. Creating Multiple resources - EC2 Instance, RDS DB Instance(MySQL), and S3 Bucket
        Dynamically create EC2 Instance and DB Instance based on the region selected i.e., there is a usage Mapping Section in the template in which regions (only Asian region are configured for this template), ami's and instance types are defined.
@@ -105,7 +105,7 @@ Outputs:
        cloud-init-output.log - output data of script executed from commands defined in UserData Section 	   
 	   cfn-init.log and cfn-init-cmd.log are the files generated from cfn-init process
 	   cfn-init.log - will provide command output of cfn-init process which is executed from metadata section
-	   cfn-hup.log - generated from cfn-hup process when it is configured and started
+	   cfn-hup.log - generated from cfn-hup process when it is configured and started i.e., cfn-hup helper is a daemon that detects changes in resource metadata and runs user-specified actions when a change is detected.
 	   
 	   If we poll the logs from cfn-hup.log, 
 	   
@@ -142,7 +142,7 @@ Outputs:
 		Template Location: advance-templates/wp-infrastructure-db-snapshot_s3-retain-policy-explicit.yaml
 
 ### 11. Intrinsic Functions
-    ##### Conditonal Functions
+    Conditonal Functions
     Restoring the DB Snapshot by demonstrating the usage of !Not, !Equals, !If Conditional Functions and AWS::NoValue Function
 	
 	Template Location: advance-templates/wp-infrastructure-db-snapshot-environmentselection-conditionalparam.yaml
@@ -158,4 +158,58 @@ Outputs:
 	
 	Parametric Constraints, Kindly check in Parameter section where limits of certain Parameters are defined, like MinLength, MaxLength, NoEcho, AllowedValues. If any of these parameter constraints are not met during Stack Creation, CloudFormation would throw Validation Error. Please refer comment - Parameter Constraints in the template file - 
 	advance-templates/wp-infrastructure-db-snapshot-environmentselection-conditionalparam-noval.yaml
-	   
+
+### 12. Setting up Shared Infrastructure
+    In this section, Cloud Formation template will help to create VPC, Internet Gateway, Nat Gateway for accessing private subnets, 3 Subnets, Elastic IP, and Routetables
+    
+    VPC ID - 10.20.0.0/16
+    Subnet A - 10.20.0.0/22
+    Subnet B - 10.20.4.0/22
+    Subnet C - 10.20.8.0/22	
+    
+	Template Location: advance-templates/00-basic-sharedinfrastructure.yaml
+	
+### 13. Setting up Application
+    In this section, we will set up the application environment with required ELB, EC2 instances, Security Group and subnets without overrlapping with shared infrastructure Cidr addresses.
+	
+	Application Subnets Cidr will be is as follows:
+	App. Public Subnet A - 10.20.13.0/24
+	App. Public Subnet B - 10.20.14.0/24
+	App. Public Subnet C - 10.20.15.0/24
+	App. Private Subnet A - 10.20.16.0/24
+	App. Private Subnet B - 10.20.17.0/24
+	App. Private Subnet C - 10.20.18.0/24
+    
+	Application Version: 1,2,3 => Predefined for the application to work and demonstrate testing process.
+	During Stack creation, If Applicaiton Version 2 is given in the input screen will not pass test due to failure in Test String Pattern and results in Failure of Stack Creation Process. This is due to CreationPolicy process. However, Suppose if Application Version 1/3 is entered during stack creation process, then stack creation will be Successful.
+	
+	Note - CreationPolicy will not be invoked during Stack Update process. For Example, During stack creation was successful, when we entered Application Version entered as 1 or 3. However, When we perform stack update, all subsequent updates will always be successful Even if you enter application version 2. Because during stack update process CreationPolicy will not be executed and Hence it was successful. Even though, Test Data String Comparison with Application Data String was a failure for application version 2, Still, End result of the update process was Successful. 
+	
+	Template Location: advance-templates/00-application-environment.yaml
+	
+### 14. Stack Reuse
+   
+   It is achieved by the concept of Cross Stack Reference. 
+  
+   To demonstrate cross stack reference, We will export parameters from the primary template which will be reused in Nested Stack. Later, in the nested stack we will import the value.
+   
+   Primary Stack :
+           Template Location: advance-templates/01-basic-sharedinfrastructure-crossstackref-export.yaml
+		   Outputs:
+			  vpcid:
+				Description: Shared Infrastructure VPC ID
+				Value: !Ref MyVPC
+				Export:  # Cross Stack Ref. to export the values in the other stack
+				  Name: basicsharedinfra-vpcid # must be unique in the region and Account. Usage here is "basicsharedinfra-" is the key followed by "vpcid"[which is outputs logical id]=> basicsharedinfra-vpcid 
+    Nested Stack:
+	       Template Location: advance-templates/01-application-environment-crossstackref-import.yaml
+		   Resources:
+			  PublicSubnetA: # Public Subnet for App Env in AZ - A
+				Type: AWS::EC2::Subnet
+				Properties:
+				  AvailabilityZone: !Select [0, !GetAZs ]
+				  CidrBlock: !Ref applicationpubliccidra
+				  MapPublicIpOnLaunch: true
+				  VpcId: !ImportValue basicsharedinfra-vpcid # Value is imported from 01-basic-sharedinfrastructure-crossstackref-export.yaml file. This key name is available in the Outputs section of vpcid under Export section. Similarily, whereever these common parameters from infrastructure are required we import it using !ImportValue
+
+  

@@ -176,22 +176,22 @@ Outputs:
 	
 ### 13. Setting up Application
     
-    In this section, we will set up the application environment with required ELB, EC2 instances, Security Group and subnets without overrlapping with shared infrastructure Cidr addresses.
+   In this section, we will set up the application environment with required ELB, EC2 instances, Security Group and subnets without overrlapping with shared infrastructure Cidr addresses.
 	
-	Application Subnets Cidr will be is as follows:
-	App. Public Subnet A - 10.20.13.0/24
-	App. Public Subnet B - 10.20.14.0/24
-	App. Public Subnet C - 10.20.15.0/24
-	App. Private Subnet A - 10.20.16.0/24
-	App. Private Subnet B - 10.20.17.0/24
-	App. Private Subnet C - 10.20.18.0/24
+   Application Subnets Cidr will be is as follows:
+   App. Public Subnet A - 10.20.13.0/24
+   App. Public Subnet B - 10.20.14.0/24
+   App. Public Subnet C - 10.20.15.0/24
+   App. Private Subnet A - 10.20.16.0/24
+   App. Private Subnet B - 10.20.17.0/24
+   App. Private Subnet C - 10.20.18.0/24
     
-	Application Version: 1,2,3 => Predefined for the application to work and demonstrate testing process.
-	During Stack creation, If Applicaiton Version 2 is given in the input screen will not pass test due to failure in Test String Pattern and results in Failure of Stack Creation Process. This is due to CreationPolicy process. However, Suppose if Application Version 1/3 is entered during stack creation process, then stack creation will be Successful.
-	
-	Note - CreationPolicy will not be invoked during Stack Update process. For Example, During stack creation was successful, when we entered Application Version entered as 1 or 3. However, When we perform stack update, all subsequent updates will always be successful Even if you enter application version 2. Because during stack update process CreationPolicy will not be executed and Hence it was successful. Even though, Test Data String Comparison with Application Data String was a failure for application version 2, Still, End result of the update process was Successful. 
-	
-	Template Location: advance-templates/00-application-environment.yaml
+   Application Version: 1,2,3 => Predefined for the application to work and demonstrate testing process.
+   During Stack creation, If Applicaiton Version 2 is given in the input screen will not pass test due to failure in Test String Pattern and results in Failure of Stack Creation Process. This is due to CreationPolicy process. However, Suppose if Application Version 1/3 is entered during stack creation process, then stack creation will be Successful.
+
+   Note - CreationPolicy will not be invoked during Stack Update process. For Example, During stack creation was successful, when we entered Application Version entered as 1 or 3. However, When we perform stack update, all subsequent updates will always be successful Even if you enter application version 2. Because during stack update process CreationPolicy will not be executed and Hence it was successful. Even though, Test Data String Comparison with Application Data String was a failure for application version 2, Still, End result of the update process was Successful. 
+
+   Template Location: advance-templates/00-application-environment.yaml
 	
 ### 14. Stack Reuse
    

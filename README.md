@@ -92,35 +92,35 @@ Outputs:
 	   
 ### 8. Installing and Configuring -  Web Server, PHP, WordPress using Using cfn-init and cfn-hup  
 
-    <p align=”justify”>This is an effective and platform independent approach i.e., usually for Linux Platform, UserData Section consists of shell scripts whereas for Windows platform, UserData section use to be batch / powershell script. Therefore, for any Platform their is necessity of creating script supported by new platforms which makes process ineffective. Hence, resulting in many scripts which will difficult to manage.
+   <p align=”justify”>This is an effective and platform independent approach i.e., usually for Linux Platform, UserData Section consists of shell scripts whereas for Windows platform, UserData section use to be batch / powershell script. Therefore, for any Platform their is necessity of creating script supported by new platforms which makes process ineffective. Hence, resulting in many scripts which will difficult to manage.
    
-    cfn-init and cfn-hup provides a effective way of implementing generic script supported by most of the platforms.
+   cfn-init and cfn-hup provides a effective way of implementing generic script supported by most of the platforms.
 
-    SSH to EC2 Instance to verify the logs.</p>
+   SSH to EC2 Instance to verify the logs.</p>
    
-    $ cd /var/log/
+   $ cd /var/log/
    
-    $ ls
+   $ ls
    
-    cloud-init.log and cloud-init-output.log are generated when UserData Section is used
-    cloud-init-output.log - output data of script executed from commands defined in UserData Section 	   
-    cfn-init.log and cfn-init-cmd.log are the files generated from cfn-init process
-    cfn-init.log - will provide command output of cfn-init process which is executed from metadata section
-    cfn-hup.log - generated from cfn-hup process when it is configured and started i.e., cfn-hup helper is a daemon that detects changes in resource metadata and runs user-specified actions when a change is detected.
+   cloud-init.log and cloud-init-output.log are generated when UserData Section is used
+   cloud-init-output.log - output data of script executed from commands defined in UserData Section 	   
+   cfn-init.log and cfn-init-cmd.log are the files generated from cfn-init process
+   cfn-init.log - will provide command output of cfn-init process which is executed from metadata section
+   cfn-hup.log - generated from cfn-hup process when it is configured and started i.e., cfn-hup helper is a daemon that detects changes in resource metadata and runs user-specified actions when a change is detected.
    
-    If we poll the logs from cfn-hup.log, 
+   If we poll the logs from cfn-hup.log, 
    
-    $ cat cfn-hup.log
+   $ cat cfn-hup.log
    
-    From the template, as it is polled every 5 minutes.
+   From the template, as it is polled every 5 minutes.
    
-    Browse, Public IP Address - http://<publicip>/index2.html -> You can see string on the browser which is defined in Parameter Section of the template - "HelloWorld"
+   Browse, Public IP Address - http://<publicip>/index2.html -> You can see string on the browser which is defined in Parameter Section of the template - "HelloWorld"
    
-    Whenever this sample string is changed, cfn-hup detect the changes in the file index2.html. cfn-hup polls the changes. 
+   Whenever this sample string is changed, cfn-hup detect the changes in the file index2.html. cfn-hup polls the changes. 
    
-    $ tail -f cfn-hup.log
+   $ tail -f cfn-hup.log
    
-    Template location - advance-templates/wp-infrastructure-cfn-init.yaml       
+   Template location - advance-templates/wp-infrastructure-cfn-init.yaml       
 	   
 ### 9. Creation Policy and cfn-signal
 

@@ -91,58 +91,62 @@ Outputs:
 	   Template location - advance-templates/wp-infrastructure-install.yaml
 	   
 ### 8. Installing and Configuring -  Web Server, PHP, WordPress using Using cfn-init and cfn-hup  
-	   <p align=”justify”>This is an effective and platform independent approach i.e., usually for Linux Platform, UserData Section consists of shell scripts whereas for Windows platform, UserData section use to be batch / powershell script. Therefore, for any Platform their is necessity of creating script supported by new platforms which makes process ineffective. Hence, resulting in many scripts which will difficult to manage.
-	   
-	   cfn-init and cfn-hup provides a effective way of implementing generic script supported by most of the platforms.
 
-	   SSH to EC2 Instance to verify the logs.</p>
-	   
-	   $ cd /var/log/
-	   
-	   $ ls
-	   
-       cloud-init.log and cloud-init-output.log are generated when UserData Section is used
-       cloud-init-output.log - output data of script executed from commands defined in UserData Section 	   
-	   cfn-init.log and cfn-init-cmd.log are the files generated from cfn-init process
-	   cfn-init.log - will provide command output of cfn-init process which is executed from metadata section
-	   cfn-hup.log - generated from cfn-hup process when it is configured and started i.e., cfn-hup helper is a daemon that detects changes in resource metadata and runs user-specified actions when a change is detected.
-	   
-	   If we poll the logs from cfn-hup.log, 
-	   
-	   $ cat cfn-hup.log
-	   
-	   From the template, as it is polled every 5 minutes.
-	   
-	   Browse, Public IP Address - http://<publicip>/index2.html -> You can see string on the browser which is defined in Parameter Section of the template - "HelloWorld"
-	   
-	   Whenever this sample string is changed, cfn-hup detect the changes in the file index2.html. cfn-hup polls the changes. 
-	   
-       $ tail -f cfn-hup.log
-	   
-	   Template location - advance-templates/wp-infrastructure-cfn-init.yaml       
+    <p align=”justify”>This is an effective and platform independent approach i.e., usually for Linux Platform, UserData Section consists of shell scripts whereas for Windows platform, UserData section use to be batch / powershell script. Therefore, for any Platform their is necessity of creating script supported by new platforms which makes process ineffective. Hence, resulting in many scripts which will difficult to manage.
+   
+    cfn-init and cfn-hup provides a effective way of implementing generic script supported by most of the platforms.
+
+    SSH to EC2 Instance to verify the logs.</p>
+   
+    $ cd /var/log/
+   
+    $ ls
+   
+    cloud-init.log and cloud-init-output.log are generated when UserData Section is used
+    cloud-init-output.log - output data of script executed from commands defined in UserData Section 	   
+    cfn-init.log and cfn-init-cmd.log are the files generated from cfn-init process
+    cfn-init.log - will provide command output of cfn-init process which is executed from metadata section
+    cfn-hup.log - generated from cfn-hup process when it is configured and started i.e., cfn-hup helper is a daemon that detects changes in resource metadata and runs user-specified actions when a change is detected.
+   
+    If we poll the logs from cfn-hup.log, 
+   
+    $ cat cfn-hup.log
+   
+    From the template, as it is polled every 5 minutes.
+   
+    Browse, Public IP Address - http://<publicip>/index2.html -> You can see string on the browser which is defined in Parameter Section of the template - "HelloWorld"
+   
+    Whenever this sample string is changed, cfn-hup detect the changes in the file index2.html. cfn-hup polls the changes. 
+   
+    $ tail -f cfn-hup.log
+   
+    Template location - advance-templates/wp-infrastructure-cfn-init.yaml       
 	   
 ### 9. Creation Policy and cfn-signal
-       cfn-signal - will help to send signal to Creation Policy about resource creation completion signal to CreationPolicy.
+
+    cfn-signal - will help to send signal to Creation Policy about resource creation completion signal to CreationPolicy.
 	   
-	   Template Location -
-	   a. with no cfn-signal defined - advance-templates/wp-infrastructure-creationpolicy-no-cfn-signal.yaml
-	   b. with cfn-signal defined - advance-templates/wp-infrastructure-creationpolicy-cfn-signal.yaml
+    Template Location -
+    a. with no cfn-signal defined - advance-templates/wp-infrastructure-creationpolicy-no-cfn-signal.yaml
+    b. with cfn-signal defined - advance-templates/wp-infrastructure-creationpolicy-cfn-signal.yaml
 	   
 ### 10. Deletion Policy
-       Supported types are Delete, Retain (Supported by few AWS Resource types) and Snapshot (Supported by few AWS Resource types).
-	   By Default, Its ***Delete*** Policy. 
-	   To define, explicity you implement as ***DeletionPolicy: Delete***
-	   
-	   a. Delete Behavior
-	   Template Location: advance-templates/wp-infrastructure-delete-policy-explicit.yaml
+    
+	Supported types are Delete, Retain (Supported by few AWS Resource types) and Snapshot (Supported by few AWS Resource types).
+	By Default, Its ***Delete*** Policy. 
+	To define, explicity you implement as ***DeletionPolicy: Delete***
+   
+	a. Delete Behavior
+	Template Location: advance-templates/wp-infrastructure-delete-policy-explicit.yaml
 
-	   b. Retain / Snapshot
-		Retain Operation - Will retain s3 Bucket and skips deleting even though the stack is deleted.
-		Snapshot - First creates snapshot of RDS DB Instance then initiates deleting process.
-		Template Location: advance-templates/wp-infrastructure-db-snapshot_s3-retain-policy-explicit.yaml
+	b. Retain / Snapshot
+	Retain Operation - Will retain s3 Bucket and skips deleting even though the stack is deleted.
+	Snapshot - First creates snapshot of RDS DB Instance then initiates deleting process.
+	Template Location: advance-templates/wp-infrastructure-db-snapshot_s3-retain-policy-explicit.yaml
 
 ### 11. Intrinsic Functions
-    Conditonal Functions
+    
+	Conditonal Functions
     Restoring the DB Snapshot by demonstrating the usage of !Not, !Equals, !If Conditional Functions and AWS::NoValue Function
 	
 	Template Location: advance-templates/wp-infrastructure-db-snapshot-environmentselection-conditionalparam.yaml
@@ -160,7 +164,8 @@ Outputs:
 	advance-templates/wp-infrastructure-db-snapshot-environmentselection-conditionalparam-noval.yaml
 
 ### 12. Setting up Shared Infrastructure
-    In this section, Cloud Formation template will help to create VPC, Internet Gateway, Nat Gateway for accessing private subnets, 3 Subnets, Elastic IP, and Routetables
+    
+	In this section, Cloud Formation template will help to create VPC, Internet Gateway, Nat Gateway for accessing private subnets, 3 Subnets, Elastic IP, and Routetables
     
     VPC ID - 10.20.0.0/16
     Subnet A - 10.20.0.0/22
@@ -170,7 +175,8 @@ Outputs:
 	Template Location: advance-templates/00-basic-sharedinfrastructure.yaml
 	
 ### 13. Setting up Application
-    In this section, we will set up the application environment with required ELB, EC2 instances, Security Group and subnets without overrlapping with shared infrastructure Cidr addresses.
+    
+	In this section, we will set up the application environment with required ELB, EC2 instances, Security Group and subnets without overrlapping with shared infrastructure Cidr addresses.
 	
 	Application Subnets Cidr will be is as follows:
 	App. Public Subnet A - 10.20.13.0/24
@@ -212,5 +218,4 @@ Outputs:
 				  CidrBlock: !Ref applicationpubliccidra
 				  MapPublicIpOnLaunch: true
 				  VpcId: !ImportValue basicsharedinfra-vpcid # Value is imported from 01-basic-sharedinfrastructure-crossstackref-export.yaml file. This key name is available in the Outputs section of vpcid under Export section. Similarily, whereever these common parameters from infrastructure are required we import it using !ImportValue
-    ``` 
-  
+    ```

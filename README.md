@@ -193,6 +193,7 @@ Outputs:
   
    To demonstrate cross stack reference, We will export parameters from the primary template which will be reused in Nested Stack. Later, in the nested stack we will import the value.
    
+   ```yaml
    Primary Stack :
            Template Location: advance-templates/01-basic-sharedinfrastructure-crossstackref-export.yaml
 		   Outputs:
@@ -211,5 +212,5 @@ Outputs:
 				  CidrBlock: !Ref applicationpubliccidra
 				  MapPublicIpOnLaunch: true
 				  VpcId: !ImportValue basicsharedinfra-vpcid # Value is imported from 01-basic-sharedinfrastructure-crossstackref-export.yaml file. This key name is available in the Outputs section of vpcid under Export section. Similarily, whereever these common parameters from infrastructure are required we import it using !ImportValue
-
+    ``` 
   

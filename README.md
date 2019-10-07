@@ -176,7 +176,7 @@ Outputs:
 	
 ### 13. Setting up Application
     
-	In this section, we will set up the application environment with required ELB, EC2 instances, Security Group and subnets without overrlapping with shared infrastructure Cidr addresses.
+    In this section, we will set up the application environment with required ELB, EC2 instances, Security Group and subnets without overrlapping with shared infrastructure Cidr addresses.
 	
 	Application Subnets Cidr will be is as follows:
 	App. Public Subnet A - 10.20.13.0/24
